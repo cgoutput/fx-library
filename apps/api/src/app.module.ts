@@ -4,6 +4,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma';
 import { AuthModule } from './auth';
+import { AssetsModule } from './assets';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -19,6 +20,7 @@ import { HealthController } from './health.controller';
     ]),
     PrismaModule,
     AuthModule,
+    AssetsModule,
   ],
   controllers: [HealthController],
   providers: [
