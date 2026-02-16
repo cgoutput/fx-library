@@ -9,6 +9,7 @@ import { StorageModule } from './storage';
 import { DownloadsModule } from './downloads';
 import { EventsModule } from './events';
 import { CollectionsModule } from './collections';
+import { AdminModule } from './admin';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -29,6 +30,7 @@ import { HealthController } from './health.controller';
     DownloadsModule,
     EventsModule,
     CollectionsModule,
+    AdminModule,
   ],
   controllers: [HealthController],
   providers: [
