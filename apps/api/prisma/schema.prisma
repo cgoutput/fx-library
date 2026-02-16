@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Category {
+  PYRO
+  FLIP
+  VELLUM
+  RBD
+  PARTICLES
+  OCEAN
+  USD
+  TOOLS
+  OTHER
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum AssetStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PreviewType {
+  IMAGE
+  VIDEO
+  GIF
+}
+
+enum Renderer {
+  MANTRA
+  KARMA
+  REDSHIFT
+  OCTANE
+  ARNOLD
+  VRAY
+  NONE
+}
+
+enum OS {
+  WINDOWS
+  LINUX
+  MACOS
+  ANY
+}
+
+enum TagKind {
+  CATEGORY
+  TECHNIQUE
+  FEATURE
+}
+
+enum EventType {
+  VIEW_ASSET
+  SEARCH
+  PLAY_PREVIEW
+  DOWNLOAD_ATTEMPT
+  DOWNLOAD_SUCCESS
+  ADD_TO_COLLECTION
+}
+
+// ── Models ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  refreshToken String? @map("refresh_token")
+
+  collections Collection[]
+  downloads   Download[]
+  events      Event[]
+
+  @@map("users")
+}
+
+model Asset {
+  id            String      @id @default(uuid()) @db.Uuid
+  title         String
+  slug          String      @unique
+  summary       String
+  descriptionMd String?     @map("description_md")
+  howToMd       String?     @map("how_to_md")
+  breakdownMd   String?     @map("breakdown_md")
+  category      Category
+  difficulty    Difficulty
+  status        AssetStatus @default(DRAFT)
+  publishedAt   DateTime?   @map("published_at")
+  downloadCount Int         @default(0) @map("download_count")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  versions        AssetVersion[]
+  previews        Preview[]
+  tags            AssetTag[]
+  collectionItems CollectionItem[]
+
+  @@map("assets")
+}
+
+model AssetVersion {
+  id            String   @id @default(uuid()) @db.Uuid
+  assetId       String   @map("asset_id") @db.Uuid
+  versionString String   @map("version_string")
+  houdiniMin    String   @map("houdini_min")
+  houdiniMax    String?  @map("houdini_max")
+  renderer      Renderer @default(NONE)
+  os            OS       @default(ANY)
+  notesMd       String?  @map("notes_md")
+  filePath      String   @map("file_path")
+  fileSize      Int      @map("file_size")
+  sha256        String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  asset     Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  downloads Download[]
+
+  @@map("asset_versions")
+}
+
+model Preview {
+  id        String      @id @default(uuid()) @db.Uuid
+  assetId   String      @map("asset_id") @db.Uuid
+  type      PreviewType
+  url       String
+  sortOrder Int         @default(0) @map("sort_order")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("previews")
+}
+
+model Tag {
+  id   String  @id @default(uuid()) @db.Uuid
+  name String  @unique
+  kind TagKind @default(CATEGORY)
+
+  assets AssetTag[]
+
+  @@map("tags")
+}
+
+model AssetTag {
+  assetId String @map("asset_id") @db.Uuid
+  tagId   String @map("tag_id") @db.Uuid
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([assetId, tagId])
+  @@map("asset_tags")
+}
+
+model Collection {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  title     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CollectionItem[]
+
+  @@map("collections")
+}
+
+model CollectionItem {
+  collectionId String   @map("collection_id") @db.Uuid
+  assetId      String   @map("asset_id") @db.Uuid
+  addedAt      DateTime @default(now()) @map("added_at")
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  asset      Asset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, assetId])
+  @@map("collection_items")
+}
+
+model Download {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  assetVersionId String   @map("asset_version_id") @db.Uuid
+  ipHash         String   @map("ip_hash")
+  userAgent      String?  @map("user_agent")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetVersion AssetVersion @relation(fields: [assetVersionId], references: [id], onDelete: Cascade)
+
+  @@map("downloads")
+}
+
+model Event {
+  id        String    @id @default(uuid()) @db.Uuid
+  type      EventType
+  userId    String?   @map("user_id") @db.Uuid
+  payload   Json?
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([type])
+  @@index([createdAt])
+  @@map("events")
+}
