@@ -7,6 +7,8 @@ import { AuthModule } from './auth';
 import { AssetsModule } from './assets';
 import { StorageModule } from './storage';
 import { DownloadsModule } from './downloads';
+import { EventsModule } from './events';
+import { CollectionsModule } from './collections';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -25,6 +27,8 @@ import { HealthController } from './health.controller';
     AssetsModule,
     StorageModule,
     DownloadsModule,
+    EventsModule,
+    CollectionsModule,
   ],
   controllers: [HealthController],
   providers: [
