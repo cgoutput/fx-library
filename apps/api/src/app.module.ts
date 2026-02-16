@@ -5,6 +5,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma';
 import { AuthModule } from './auth';
 import { AssetsModule } from './assets';
+import { StorageModule } from './storage';
+import { DownloadsModule } from './downloads';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -21,6 +23,8 @@ import { HealthController } from './health.controller';
     PrismaModule,
     AuthModule,
     AssetsModule,
+    StorageModule,
+    DownloadsModule,
   ],
   controllers: [HealthController],
   providers: [
