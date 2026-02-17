@@ -10,8 +10,12 @@ async function bootstrap() {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],
   });
 
-  // Security headers
-  app.use(helmet());
+  // Security headers (allow cross-origin requests from frontend)
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(cookieParser());
   app.setGlobalPrefix('v1');
 
