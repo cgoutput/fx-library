@@ -8,6 +8,7 @@ import { useAsset, useAssets } from '@/lib/hooks';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import { LoginModal } from '@/components/login-modal';
+import { AddToCollectionModal } from '@/components/add-to-collection-modal';
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   BEGINNER: 'bg-green-900/50 text-green-300 border-green-800',
@@ -24,6 +25,7 @@ export default function AssetDetailPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('versions');
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [downloading, setDownloading] = useState<string | null>(null);
 
   // Related assets (same category)
@@ -101,8 +103,21 @@ export default function AssetDetailPage() {
 
       {/* Title + badges */}
       <div className="mb-4">
-        <h1 className="text-3xl font-bold">{asset.title}</h1>
-        <p className="mt-2 text-gray-400">{asset.summary}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">{asset.title}</h1>
+            <p className="mt-2 text-gray-400">{asset.summary}</p>
+          </div>
+          <button
+            onClick={() => {
+              if (!user) { setShowLoginModal(true); return; }
+              setShowCollectionModal(true);
+            }}
+            className="shrink-0 rounded border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
+          >
+            Save
+          </button>
+        </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="rounded bg-gray-800 px-2 py-1 font-mono text-xs text-gray-400">
             {asset.category}
@@ -234,6 +249,12 @@ export default function AssetDetailPage() {
 
       {/* Login modal */}
       {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
+      {showCollectionModal && asset && (
+        <AddToCollectionModal
+          assetId={asset.id}
+          onClose={() => setShowCollectionModal(false)}
+        />
+      )}
     </div>
   );
 }

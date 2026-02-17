@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from './api';
-import type { AssetListResponse, AssetDetail, AssetListQuery } from '@fx-library/shared';
+import type {
+  AssetListResponse,
+  AssetDetail,
+  AssetListQuery,
+  CollectionResponse,
+  CollectionDetail,
+} from '@fx-library/shared';
 
 export function useAssets(query: Partial<AssetListQuery>) {
   return useQuery({
@@ -32,5 +38,20 @@ export function useTags() {
     queryKey: ['tags'],
     queryFn: () =>
       api<Record<string, { id: string; name: string; kind: string }[]>>('/tags'),
+  });
+}
+
+export function useCollections() {
+  return useQuery({
+    queryKey: ['collections'],
+    queryFn: () => api<CollectionResponse[]>('/collections'),
+  });
+}
+
+export function useCollection(id: string) {
+  return useQuery({
+    queryKey: ['collection', id],
+    queryFn: () => api<CollectionDetail>(`/collections/${id}`),
+    enabled: !!id,
   });
 }
