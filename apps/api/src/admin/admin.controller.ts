@@ -8,7 +8,7 @@ import {
   UsePipes,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { createAssetDto, updateAssetDto } from '@fx-library/shared';
+import { createAssetDto, CreateAssetDto, updateAssetDto, UpdateAssetDto } from '@fx-library/shared';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -23,14 +23,14 @@ export class AdminController {
 
   @Post()
   @UsePipes(new ZodValidationPipe(createAssetDto))
-  async create(@Body() body: any) {
+  async create(@Body() body: CreateAssetDto) {
     return this.adminService.createAsset(body);
   }
 
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(new ZodValidationPipe(updateAssetDto)) body: any,
+    @Body(new ZodValidationPipe(updateAssetDto)) body: UpdateAssetDto,
   ) {
     return this.adminService.updateAsset(id, body);
   }

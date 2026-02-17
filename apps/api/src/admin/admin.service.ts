@@ -26,9 +26,7 @@ export class AdminService {
       data: {
         ...data,
         slug: finalSlug,
-        tags: tagIds?.length
-          ? { create: tagIds.map((tagId) => ({ tagId })) }
-          : undefined,
+        tags: tagIds?.length ? { create: tagIds.map((tagId) => ({ tagId })) } : undefined,
       },
       include: { tags: { include: { tag: true } } },
     });

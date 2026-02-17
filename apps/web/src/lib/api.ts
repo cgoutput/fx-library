@@ -26,10 +26,7 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
-export async function api<T = unknown>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+export async function api<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
 
   if (accessToken) {

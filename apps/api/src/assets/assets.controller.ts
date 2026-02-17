@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query, Req } from '@nestjs/common';
-import { Request } from 'express';
 import { assetListQuerySchema } from '@fx-library/shared';
+import { AuthenticatedRequest } from '../auth/types/authenticated-request';
 import { AssetsService } from './assets.service';
 
 @Controller()
@@ -14,8 +14,8 @@ export class AssetsController {
   }
 
   @Get('assets/:slug')
-  async findBySlug(@Param('slug') slug: string, @Req() req: Request) {
-    const user = (req as any).user;
+  async findBySlug(@Param('slug') slug: string, @Req() req: AuthenticatedRequest) {
+    const user = req.user;
     const isAdmin = user?.role === 'ADMIN';
     return this.assetsService.findBySlug(slug, isAdmin);
   }

@@ -53,10 +53,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async logout(
-    @CurrentUser('sub') userId: string,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logout(@CurrentUser('sub') userId: string, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(userId);
     res.clearCookie(REFRESH_COOKIE);
     return { message: 'Logged out' };
@@ -65,10 +62,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies?.[REFRESH_COOKIE];
     if (!token) {
       res.status(HttpStatus.UNAUTHORIZED).json({ message: 'No refresh token' });

@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Param,
-  Req,
-  UseGuards,
-  ParseUUIDPipe,
-} from '@nestjs/common';
+import { Controller, Post, Param, Req, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';

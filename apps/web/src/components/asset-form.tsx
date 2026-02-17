@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ApiError } from '@/lib/api';
 import { useTags } from '@/lib/hooks';
 
 const CATEGORIES = ['PYRO', 'FLIP', 'VELLUM', 'RBD', 'PARTICLES', 'OCEAN', 'USD', 'TOOLS', 'OTHER'];
@@ -21,6 +22,13 @@ interface Props {
   initial?: Partial<AssetFormData>;
   onSubmit: (data: AssetFormData) => Promise<void>;
   submitLabel: string;
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  return fallback;
 }
 
 export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
@@ -49,9 +57,7 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
   function toggleTag(id: string) {
     setForm((prev) => ({
       ...prev,
-      tagIds: prev.tagIds.includes(id)
-        ? prev.tagIds.filter((t) => t !== id)
-        : [...prev.tagIds, id],
+      tagIds: prev.tagIds.includes(id) ? prev.tagIds.filter((t) => t !== id) : [...prev.tagIds, id],
     }));
   }
 
@@ -61,8 +67,8 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
     setSubmitting(true);
     try {
       await onSubmit(form);
-    } catch (err: any) {
-      setError(err?.message ?? 'Failed');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed'));
     } finally {
       setSubmitting(false);
     }
@@ -88,7 +94,11 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
           />
           {form.title && (
             <p className="mt-1 text-xs text-gray-500 font-mono">
-              slug: {form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}
+              slug:{' '}
+              {form.title
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '')}
             </p>
           )}
         </div>
@@ -113,7 +123,9 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
             className="w-full rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
           >
             {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
         </div>
@@ -125,7 +137,9 @@ export function AssetForm({ initial, onSubmit, submitLabel }: Props) {
             className="w-full rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
           >
             {DIFFICULTIES.map((d) => (
-              <option key={d} value={d}>{d}</option>
+              <option key={d} value={d}>
+                {d}
+              </option>
             ))}
           </select>
         </div>

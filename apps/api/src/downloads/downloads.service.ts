@@ -32,7 +32,10 @@ export class DownloadsService {
 
     // Hash IP
     const salt = this.config.get<string>('IP_HASH_SALT', 'default-salt');
-    const ipHash = crypto.createHash('sha256').update(ip + salt).digest('hex');
+    const ipHash = crypto
+      .createHash('sha256')
+      .update(ip + salt)
+      .digest('hex');
 
     // Record download attempt event
     await this.prisma.event.create({
