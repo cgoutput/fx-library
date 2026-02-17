@@ -1,11 +1,17 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+  });
 
+  // Security headers
+  app.use(helmet());
   app.use(cookieParser());
   app.setGlobalPrefix('v1');
 
@@ -27,6 +33,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(process.env.PORT ?? 4000);
+  const port = process.env.PORT ?? 4000;
+  await app.listen(port);
+
+  const logger = new Logger('Bootstrap');
+  logger.log(`API running on http://localhost:${port}`);
+  logger.log(`Swagger docs at http://localhost:${port}/docs`);
 }
 bootstrap();
