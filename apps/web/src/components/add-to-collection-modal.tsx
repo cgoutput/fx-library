@@ -3,11 +3,18 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCollections } from '@/lib/hooks';
-import { api } from '@/lib/api';
+import { ApiError, api } from '@/lib/api';
 
 interface Props {
   assetId: string;
   onClose: () => void;
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  return fallback;
 }
 
 export function AddToCollectionModal({ assetId, onClose }: Props) {
@@ -29,8 +36,8 @@ export function AddToCollectionModal({ assetId, onClose }: Props) {
       setMessage('Added!');
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       setTimeout(onClose, 600);
-    } catch (err: any) {
-      setMessage(err?.message ?? 'Failed to add');
+    } catch (error: unknown) {
+      setMessage(getErrorMessage(error, 'Failed to add'));
     } finally {
       setAdding(null);
     }
@@ -53,8 +60,8 @@ export function AddToCollectionModal({ assetId, onClose }: Props) {
       setMessage('Created & added!');
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       setTimeout(onClose, 600);
-    } catch (err: any) {
-      setMessage(err?.message ?? 'Failed');
+    } catch (error: unknown) {
+      setMessage(getErrorMessage(error, 'Failed'));
     } finally {
       setCreating(false);
     }
@@ -71,9 +78,7 @@ export function AddToCollectionModal({ assetId, onClose }: Props) {
         </div>
 
         {message && (
-          <div className="mb-3 rounded bg-gray-800 px-3 py-2 text-sm text-gray-300">
-            {message}
-          </div>
+          <div className="mb-3 rounded bg-gray-800 px-3 py-2 text-sm text-gray-300">{message}</div>
         )}
 
         {isLoading ? (

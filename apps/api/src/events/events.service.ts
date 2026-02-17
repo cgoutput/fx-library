@@ -6,11 +6,7 @@ import { PrismaService } from '../prisma';
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    type: EventType,
-    userId: string | null,
-    payload?: Record<string, unknown>,
-  ) {
+  async create(type: EventType, userId: string | null, payload?: Record<string, unknown>) {
     const event = await this.prisma.event.create({
       data: {
         type,

@@ -19,7 +19,7 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
               "media-src 'self' blob: https:",
-              "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'),
+              "connect-src 'self' " + (() => { try { return new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000').origin; } catch { return 'http://localhost:4000'; } })(),
             ].join('; '),
           },
         ],

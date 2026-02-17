@@ -26,7 +26,10 @@ export class AssetsService {
     }
 
     if (tags) {
-      const tagNames = tags.split(',').map((t) => t.trim()).filter(Boolean);
+      const tagNames = tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
       if (tagNames.length > 0) {
         where.tags = {
           some: {

@@ -36,8 +36,7 @@ export function useAsset(slug: string) {
 export function useTags() {
   return useQuery({
     queryKey: ['tags'],
-    queryFn: () =>
-      api<Record<string, { id: string; name: string; kind: string }[]>>('/tags'),
+    queryFn: () => api<Record<string, { id: string; name: string; kind: string }[]>>('/tags'),
   });
 }
 

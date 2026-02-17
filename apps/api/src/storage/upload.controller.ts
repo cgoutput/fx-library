@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as crypto from 'crypto';
+import { OS, Renderer } from '@fx-library/shared';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -39,7 +40,9 @@ export class UploadController {
 
     const previewId = crypto.randomUUID();
     const sortOrder = parseInt(sortOrderRaw, 10) || 0;
-    const previewType = (['IMAGE', 'VIDEO', 'GIF'].includes(type?.toUpperCase()) ? type.toUpperCase() : 'IMAGE') as 'IMAGE' | 'VIDEO' | 'GIF';
+    const previewType = (
+      ['IMAGE', 'VIDEO', 'GIF'].includes(type?.toUpperCase()) ? type.toUpperCase() : 'IMAGE'
+    ) as 'IMAGE' | 'VIDEO' | 'GIF';
     const filePath = `previews/${assetId}/${previewId}/${file.originalname}`;
 
     await this.storage.uploadFile('previews', filePath, file.buffer, file.mimetype);
@@ -79,8 +82,23 @@ export class UploadController {
 
     await this.storage.uploadFile('assets', filePath, file.buffer, file.mimetype);
 
-    const validRenderers = ['MANTRA', 'KARMA', 'REDSHIFT', 'OCTANE', 'ARNOLD', 'VRAY', 'NONE'];
-    const validOs = ['WINDOWS', 'LINUX', 'MACOS', 'ANY'];
+    const validRenderers: readonly Renderer[] = [
+      'MANTRA',
+      'KARMA',
+      'REDSHIFT',
+      'OCTANE',
+      'ARNOLD',
+      'VRAY',
+      'NONE',
+    ];
+    const validOs: readonly OS[] = ['WINDOWS', 'LINUX', 'MACOS', 'ANY'];
+    const normalizedRenderer = renderer?.toUpperCase() as Renderer | undefined;
+    const normalizedOs = os?.toUpperCase() as OS | undefined;
+    const rendererValue: Renderer =
+      normalizedRenderer && validRenderers.includes(normalizedRenderer)
+        ? normalizedRenderer
+        : 'NONE';
+    const osValue: OS = normalizedOs && validOs.includes(normalizedOs) ? normalizedOs : 'ANY';
 
     const version = await this.prisma.assetVersion.create({
       data: {
@@ -89,8 +107,8 @@ export class UploadController {
         versionString,
         houdiniMin,
         houdiniMax: houdiniMax || null,
-        renderer: validRenderers.includes(renderer?.toUpperCase()) ? (renderer.toUpperCase() as any) : 'NONE',
-        os: validOs.includes(os?.toUpperCase()) ? (os.toUpperCase() as any) : 'ANY',
+        renderer: rendererValue,
+        os: osValue,
         notesMd: notesMd || null,
         filePath,
         fileSize,

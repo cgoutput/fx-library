@@ -22,10 +22,7 @@ export class CollectionsController {
 
   @Post()
   @UsePipes(new ZodValidationPipe(createCollectionDto))
-  async create(
-    @Body() body: { title: string },
-    @CurrentUser('sub') userId: string,
-  ) {
+  async create(@Body() body: { title: string }, @CurrentUser('sub') userId: string) {
     return this.collectionsService.create(userId, body.title);
   }
 
@@ -35,10 +32,7 @@ export class CollectionsController {
   }
 
   @Get(':id')
-  async findOne(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser('sub') userId: string,
-  ) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('sub') userId: string) {
     return this.collectionsService.findById(id, userId);
   }
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import type { Category, Difficulty } from '@fx-library/shared';
 import { useAssets, useTags } from '@/lib/hooks';
 
 const CATEGORIES = ['PYRO', 'FLIP', 'VELLUM', 'RBD', 'PARTICLES', 'OCEAN', 'USD', 'TOOLS', 'OTHER'];
@@ -20,8 +21,8 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 export default function AssetsPage() {
   const [page, setPage] = useState(1);
-  const [category, setCategory] = useState('');
-  const [difficulty, setDifficulty] = useState('');
+  const [category, setCategory] = useState<Category | ''>('');
+  const [difficulty, setDifficulty] = useState<Difficulty | ''>('');
   const [sort, setSort] = useState<'new' | 'updated' | 'popular'>('new');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -30,16 +31,14 @@ export default function AssetsPage() {
   const { data, isLoading } = useAssets({
     page,
     pageSize: 20,
-    category: (category || undefined) as any,
-    difficulty: (difficulty || undefined) as any,
+    category: category || undefined,
+    difficulty: difficulty || undefined,
     sort,
     searchQuery: searchQuery || undefined,
     tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
   });
 
-  const allTags = tagsData
-    ? Object.values(tagsData).flat()
-    : [];
+  const allTags = tagsData ? Object.values(tagsData).flat() : [];
 
   function toggleTag(name: string) {
     setSelectedTags((prev) =>
@@ -58,36 +57,54 @@ export default function AssetsPage() {
           type="text"
           placeholder="Search assets..."
           value={searchQuery}
-          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(1);
+          }}
           className="rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-white focus:outline-none w-64"
         />
         <select
           value={category}
-          onChange={(e) => { setCategory(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setCategory(e.target.value as Category | '');
+            setPage(1);
+          }}
           className="rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
         >
           <option value="">All Categories</option>
           {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c}>
+              {c}
+            </option>
           ))}
         </select>
         <select
           value={difficulty}
-          onChange={(e) => { setDifficulty(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setDifficulty(e.target.value as Difficulty | '');
+            setPage(1);
+          }}
           className="rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
         >
           <option value="">All Difficulties</option>
           {DIFFICULTIES.map((d) => (
-            <option key={d} value={d}>{d}</option>
+            <option key={d} value={d}>
+              {d}
+            </option>
           ))}
         </select>
         <select
           value={sort}
-          onChange={(e) => { setSort(e.target.value as typeof sort); setPage(1); }}
+          onChange={(e) => {
+            setSort(e.target.value as typeof sort);
+            setPage(1);
+          }}
           className="rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white focus:border-white focus:outline-none"
         >
           {SORTS.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
           ))}
         </select>
       </div>
@@ -115,7 +132,10 @@ export default function AssetsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="animate-pulse rounded-lg border border-gray-800 bg-gray-900 p-4">
+            <div
+              key={i}
+              className="animate-pulse rounded-lg border border-gray-800 bg-gray-900 p-4"
+            >
               <div className="h-40 rounded bg-gray-800 mb-3" />
               <div className="h-4 w-3/4 rounded bg-gray-800 mb-2" />
               <div className="h-3 w-full rounded bg-gray-800" />
@@ -133,7 +153,9 @@ export default function AssetsPage() {
               >
                 {/* Cover placeholder */}
                 <div className="h-40 bg-gray-800 flex items-center justify-center">
-                  <span className="font-mono text-xs text-gray-600 uppercase">{asset.category}</span>
+                  <span className="font-mono text-xs text-gray-600 uppercase">
+                    {asset.category}
+                  </span>
                 </div>
                 <div className="p-4">
                   <h3 className="font-medium text-white group-hover:text-gray-200 line-clamp-1">
@@ -144,18 +166,20 @@ export default function AssetsPage() {
                     <span className="rounded bg-gray-800 px-2 py-0.5 font-mono text-xs text-gray-400">
                       {asset.category}
                     </span>
-                    <span className={`rounded border px-2 py-0.5 text-xs ${DIFFICULTY_COLORS[asset.difficulty] ?? ''}`}>
+                    <span
+                      className={`rounded border px-2 py-0.5 text-xs ${DIFFICULTY_COLORS[asset.difficulty] ?? ''}`}
+                    >
                       {asset.difficulty}
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {asset.tags.map((tag) => (
-                      <span key={tag.id} className="text-xs text-gray-500">#{tag.name}</span>
+                      <span key={tag.id} className="text-xs text-gray-500">
+                        #{tag.name}
+                      </span>
                     ))}
                   </div>
-                  <div className="mt-2 text-xs text-gray-500">
-                    {asset.downloadCount} downloads
-                  </div>
+                  <div className="mt-2 text-xs text-gray-500">{asset.downloadCount} downloads</div>
                 </div>
               </Link>
             ))}

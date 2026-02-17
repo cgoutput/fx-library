@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { AdminGuard } from '@/components/admin-guard';
@@ -47,22 +47,13 @@ export default function EditAssetPage() {
 function EditAssetContent() {
   const params = useParams();
   const id = params.id as string;
-  const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: asset, isLoading } = useQuery({
-    queryKey: ['admin-asset', id],
-    queryFn: () => api<AssetDetail>(`/assets/${findSlugById()}`),
-    enabled: false, // we'll use a different approach
-  });
-
-  // Fetch via a direct approach - get from admin list or slug
   const { data: assetData } = useQuery({
     queryKey: ['admin-asset-detail', id],
     queryFn: async () => {
-      // Try to find asset by fetching all and matching id
-      const list = await api<{ items: any[] }>('/assets?pageSize=100');
-      const found = list.items.find((a: any) => a.id === id);
+      const list = await api<{ items: { id: string; slug: string }[] }>('/assets?pageSize=100');
+      const found = list.items.find((a) => a.id === id);
       if (!found) return null;
       return api<AssetDetail>(`/assets/${found.slug}`);
     },
@@ -148,10 +139,6 @@ function EditAssetContent() {
   );
 }
 
-function findSlugById() {
-  return ''; // placeholder
-}
-
 function PreviewUpload({
   assetId,
   previews,
@@ -186,7 +173,10 @@ function PreviewUpload({
       {previews.length > 0 && (
         <div className="mb-4 space-y-2">
           {previews.map((p) => (
-            <div key={p.id} className="flex items-center justify-between rounded border border-gray-800 bg-gray-900 px-4 py-2 text-sm">
+            <div
+              key={p.id}
+              className="flex items-center justify-between rounded border border-gray-800 bg-gray-900 px-4 py-2 text-sm"
+            >
               <span>
                 <span className="font-mono text-xs text-gray-400">{p.type}</span>{' '}
                 <span className="text-gray-300">{p.url}</span>{' '}
@@ -199,11 +189,20 @@ function PreviewUpload({
       <form onSubmit={handleUpload} className="flex flex-wrap gap-3 items-end">
         <div>
           <label className="mb-1 block text-xs text-gray-400">File</label>
-          <input type="file" name="file" required accept="image/*,video/*,.gif" className="text-sm text-gray-400" />
+          <input
+            type="file"
+            name="file"
+            required
+            accept="image/*,video/*,.gif"
+            className="text-sm text-gray-400"
+          />
         </div>
         <div>
           <label className="mb-1 block text-xs text-gray-400">Type</label>
-          <select name="type" className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white">
+          <select
+            name="type"
+            className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white"
+          >
             <option value="IMAGE">IMAGE</option>
             <option value="VIDEO">VIDEO</option>
             <option value="GIF">GIF</option>
@@ -211,7 +210,12 @@ function PreviewUpload({
         </div>
         <div>
           <label className="mb-1 block text-xs text-gray-400">Sort Order</label>
-          <input type="number" name="sortOrder" defaultValue="0" className="w-16 rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white" />
+          <input
+            type="number"
+            name="sortOrder"
+            defaultValue="0"
+            className="w-16 rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white"
+          />
         </div>
         <button
           type="submit"
@@ -259,7 +263,10 @@ function VersionUpload({
       {versions.length > 0 && (
         <div className="mb-4 space-y-2">
           {versions.map((v) => (
-            <div key={v.id} className="rounded border border-gray-800 bg-gray-900 px-4 py-3 text-sm">
+            <div
+              key={v.id}
+              className="rounded border border-gray-800 bg-gray-900 px-4 py-3 text-sm"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-medium">v{v.versionString}</span>
                 <span className="text-xs text-gray-500">
@@ -267,7 +274,8 @@ function VersionUpload({
                 </span>
               </div>
               <p className="text-xs text-gray-400 mt-1">
-                Houdini {v.houdiniMin}{v.houdiniMax ? `–${v.houdiniMax}` : '+'} &middot; {v.renderer} &middot; {v.os}
+                Houdini {v.houdiniMin}
+                {v.houdiniMax ? `–${v.houdiniMax}` : '+'} &middot; {v.renderer} &middot; {v.os}
               </p>
               {v.notesMd && <p className="text-xs text-gray-500 mt-1">{v.notesMd}</p>}
             </div>
@@ -278,40 +286,77 @@ function VersionUpload({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div>
             <label className="mb-1 block text-xs text-gray-400">Zip File</label>
-            <input type="file" name="file" required accept=".zip" className="text-sm text-gray-400" />
+            <input
+              type="file"
+              name="file"
+              required
+              accept=".zip"
+              className="text-sm text-gray-400"
+            />
           </div>
           <div>
             <label className="mb-1 block text-xs text-gray-400">Version</label>
-            <input type="text" name="versionString" required placeholder="1.0" className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white" />
+            <input
+              type="text"
+              name="versionString"
+              required
+              placeholder="1.0"
+              className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white"
+            />
           </div>
           <div>
             <label className="mb-1 block text-xs text-gray-400">Houdini Min</label>
-            <input type="text" name="houdiniMin" required placeholder="20.0" className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white" />
+            <input
+              type="text"
+              name="houdiniMin"
+              required
+              placeholder="20.0"
+              className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white"
+            />
           </div>
           <div>
             <label className="mb-1 block text-xs text-gray-400">Houdini Max</label>
-            <input type="text" name="houdiniMax" placeholder="20.5" className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white" />
+            <input
+              type="text"
+              name="houdiniMax"
+              placeholder="20.5"
+              className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white"
+            />
           </div>
           <div>
             <label className="mb-1 block text-xs text-gray-400">Renderer</label>
-            <select name="renderer" className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white">
+            <select
+              name="renderer"
+              className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white"
+            >
               {RENDERERS.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>
+                  {r}
+                </option>
               ))}
             </select>
           </div>
           <div>
             <label className="mb-1 block text-xs text-gray-400">OS</label>
-            <select name="os" className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white">
+            <select
+              name="os"
+              className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white"
+            >
               {OS_OPTIONS.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>
+                  {o}
+                </option>
               ))}
             </select>
           </div>
         </div>
         <div>
           <label className="mb-1 block text-xs text-gray-400">Notes (Markdown)</label>
-          <textarea name="notesMd" rows={2} className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white font-mono" />
+          <textarea
+            name="notesMd"
+            rows={2}
+            className="w-full rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white font-mono"
+          />
         </div>
         <button
           type="submit"

@@ -110,7 +110,10 @@ export default function AssetDetailPage() {
           </div>
           <button
             onClick={() => {
-              if (!user) { setShowLoginModal(true); return; }
+              if (!user) {
+                setShowLoginModal(true);
+                return;
+              }
               setShowCollectionModal(true);
             }}
             className="shrink-0 rounded border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
@@ -122,11 +125,15 @@ export default function AssetDetailPage() {
           <span className="rounded bg-gray-800 px-2 py-1 font-mono text-xs text-gray-400">
             {asset.category}
           </span>
-          <span className={`rounded border px-2 py-1 text-xs ${DIFFICULTY_COLORS[asset.difficulty] ?? ''}`}>
+          <span
+            className={`rounded border px-2 py-1 text-xs ${DIFFICULTY_COLORS[asset.difficulty] ?? ''}`}
+          >
             {asset.difficulty}
           </span>
           {asset.tags.map((tag) => (
-            <span key={tag.id} className="text-xs text-gray-500">#{tag.name}</span>
+            <span key={tag.id} className="text-xs text-gray-500">
+              #{tag.name}
+            </span>
           ))}
         </div>
       </div>
@@ -136,7 +143,9 @@ export default function AssetDetailPage() {
         <div className="rounded border border-gray-800 bg-gray-900 p-3">
           <p className="text-xs text-gray-500 font-mono">Houdini</p>
           <p className="text-sm font-medium">
-            {latestVersion ? `${latestVersion.houdiniMin}${latestVersion.houdiniMax ? ` – ${latestVersion.houdiniMax}` : '+'}` : '—'}
+            {latestVersion
+              ? `${latestVersion.houdiniMin}${latestVersion.houdiniMax ? ` – ${latestVersion.houdiniMax}` : '+'}`
+              : '—'}
           </p>
         </div>
         <div className="rounded border border-gray-800 bg-gray-900 p-3">
@@ -186,7 +195,8 @@ export default function AssetDetailPage() {
                 <div>
                   <p className="font-medium">v{version.versionString}</p>
                   <p className="text-xs text-gray-500">
-                    Houdini {version.houdiniMin}{version.houdiniMax ? ` – ${version.houdiniMax}` : '+'} &middot;{' '}
+                    Houdini {version.houdiniMin}
+                    {version.houdiniMax ? ` – ${version.houdiniMax}` : '+'} &middot;{' '}
                     {version.renderer} &middot; {version.os} &middot;{' '}
                     {(version.fileSize / 1024 / 1024).toFixed(1)} MB
                   </p>
@@ -250,10 +260,7 @@ export default function AssetDetailPage() {
       {/* Login modal */}
       {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
       {showCollectionModal && asset && (
-        <AddToCollectionModal
-          assetId={asset.id}
-          onClose={() => setShowCollectionModal(false)}
-        />
+        <AddToCollectionModal assetId={asset.id} onClose={() => setShowCollectionModal(false)} />
       )}
     </div>
   );
